@@ -22,7 +22,7 @@ describe("forum shell", () => {
 
     expect(screen.getByRole("link", { name: "Community" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Neuer Thread" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Benachrichtigungen" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Benachrichtigungen" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Hell/Dunkel umschalten" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Alle Threads" })).toBeTruthy();
   });
