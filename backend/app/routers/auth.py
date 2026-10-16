@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Request, Response
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.errors import api_error
@@ -102,9 +102,20 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> UserOut
 def login(
     payload: LoginRequest, response: Response, db: Session = Depends(get_db)
 ) -> TokenResponse:
-    """Verify credentials, issue an access token and set the refresh cookie."""
-    email = payload.email.strip().lower()
-    user = db.scalars(select(User).where(func.lower(User.email) == email)).first()
+    """Verify credentials, issue an access token and set the refresh cookie.
+
+    The contract keeps the body shape ``{email, password}``; its value may be
+    either the e-mail address or the username, resolved case-insensitively.
+    """
+    identity = payload.email.strip().lower()
+    user = db.scalars(
+        select(User).where(
+            or_(
+                func.lower(User.email) == identity,
+                func.lower(User.username) == identity,
+            )
+        )
+    ).first()
     if user is None or not verify_password(payload.password, user.password_hash):
         raise api_error("invalid_credentials", "E-mail or password is incorrect", 401)
 
