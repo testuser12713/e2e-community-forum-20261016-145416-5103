@@ -12,31 +12,70 @@
       "stack": "python",
       "kind": "server",
       "install": [
-        ["${python}", "-m", "pip", "install", "-q", "-r", "requirements.txt"]
+        [
+          "${python}",
+          "-m",
+          "pip",
+          "install",
+          "-q",
+          "-r",
+          "requirements.txt"
+        ]
       ],
       "build": [
-        ["${python}", "-m", "compileall", "-q", "app"]
+        [
+          "${python}",
+          "-m",
+          "compileall",
+          "-q",
+          "app"
+        ]
       ],
       "start": [
-        "${python}", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "${PORT}"
+        "${python}",
+        "-m",
+        "uvicorn",
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "${PORT}"
       ],
       "port": 8000,
       "port_env": "PORT",
       "health": {
         "path": "/api/health",
-        "expect_status": [200]
+        "expect_status": [
+          200
+        ]
       },
       "ready_timeout_s": 60,
       "test": [
-        ["${python}", "-m", "pytest", "-q"]
+        [
+          "${python}",
+          "-m",
+          "pytest",
+          "-q"
+        ]
       ],
       "seed": [
-        ["${python}", "-m", "scripts.seed"]
+        [
+          "${python}",
+          "-m",
+          "scripts.seed"
+        ]
       ],
-      "depends_on": ["db"],
+      "depends_on": [
+        "db"
+      ],
       "env": {
-        "DATABASE_URL": { "dev": "${service:db.url}" },
-        "JWT_SECRET": { "generate": "hex", "bytes": 32 },
+        "DATABASE_URL": {
+          "dev": "${service:db.url}"
+        },
+        "JWT_SECRET": {
+          "generate": "hex",
+          "bytes": 32
+        },
         "ACCESS_TOKEN_TTL_SECONDS": {
           "dev": "900",
           "not_secret": true,
@@ -47,8 +86,12 @@
           "not_secret": true,
           "why": "refresh token lifetime in days — a plain duration, not a credential"
         },
-        "FRONTEND_ORIGIN": { "dev": "${service:web.origin}" },
-        "ADMIN_ORIGIN": { "dev": "${service:admin.origin}" }
+        "FRONTEND_ORIGIN": {
+          "dev": "${service:web.origin}"
+        },
+        "ADMIN_ORIGIN": {
+          "dev": "${service:admin.origin}"
+        }
       }
     },
     {
@@ -57,14 +100,31 @@
       "stack": "python",
       "kind": "library",
       "install": [
-        ["${python}", "-m", "pip", "install", "-q", "-e", "."]
+        [
+          "${python}",
+          "-m",
+          "pip",
+          "install",
+          "-q",
+          "-e",
+          "."
+        ]
       ],
       "test": [
-        ["${python}", "-m", "pytest", "-q"]
+        [
+          "${python}",
+          "-m",
+          "pytest",
+          "-q"
+        ]
       ],
-      "depends_on": ["db"],
+      "depends_on": [
+        "db"
+      ],
       "env": {
-        "DATABASE_URL": { "dev": "${service:db.url}" }
+        "DATABASE_URL": {
+          "dev": "${service:db.url}"
+        }
       }
     },
     {
@@ -73,24 +133,97 @@
       "stack": "python",
       "kind": "worker",
       "install": [
-        ["${python}", "-m", "pip", "install", "-q", "-r", "requirements.txt"]
+        [
+          "${python}",
+          "-m",
+          "pip",
+          "install",
+          "-q",
+          "-r",
+          "requirements.txt"
+        ]
       ],
       "build": [
-        ["${python}", "-m", "compileall", "-q", "."]
+        [
+          "${python}",
+          "-m",
+          "compileall",
+          "-q",
+          "."
+        ]
       ],
       "start": [
-        "${python}", "main.py"
+        "${python}",
+        "main.py"
       ],
       "test": [
-        ["${python}", "-m", "pytest", "-q"]
+        [
+          "${python}",
+          "-m",
+          "pytest",
+          "-q"
+        ]
       ],
-      "depends_on": ["db"],
+      "depends_on": [
+        "db"
+      ],
       "env": {
-        "DATABASE_URL": { "dev": "${service:db.url}" },
+        "DATABASE_URL": {
+          "dev": "${service:db.url}"
+        },
         "WORKER_POLL_INTERVAL_SECONDS": {
           "dev": "5",
           "not_secret": true,
           "why": "poll interval in seconds — a plain duration, not a credential"
+        }
+      }
+    },
+    {
+      "name": "admin",
+      "dir": "admin",
+      "stack": "web-vite",
+      "kind": "static",
+      "install": [
+        [
+          "npm",
+          "ci",
+          "--no-audit",
+          "--no-fund"
+        ]
+      ],
+      "build": [
+        [
+          "npm",
+          "run",
+          "build"
+        ]
+      ],
+      "start": [
+        "npm",
+        "run",
+        "preview",
+        "--",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "${PORT}"
+      ],
+      "port": 5174,
+      "port_env": "PORT",
+      "serve_dir": "dist",
+      "ready_timeout_s": 60,
+      "test": [
+        [
+          "npm",
+          "test"
+        ]
+      ],
+      "env": {
+        "VITE_API_BASE_URL": {
+          "dev": "${service:api.origin}"
+        },
+        "VITE_FORUM_URL": {
+          "dev": "${service:web.origin}"
         }
       }
     }
