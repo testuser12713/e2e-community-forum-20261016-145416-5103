@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Konto erstellen — Community</title>
+<link rel="stylesheet" href="styles.css">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem("theme") || "system";
+    var d = t === "dark" || (t === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.setAttribute("data-theme", d ? "dark" : "light");
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+
+<main class="auth-wrap" data-od-id="register-main">
+  <div class="card auth-card auth-card--440" data-od-id="register-card">
+    <div class="between">
+      <a class="brand" href="index.html" data-od-id="brand">
+        <span class="brand-mark" aria-hidden="true">C</span> Community
+      </a>
+      <button class="icon-btn" data-theme-toggle aria-label="Hell/Dunkel umschalten" data-od-id="theme-toggle">
+        <svg class="theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </div>
+
+    <h1 data-od-id="register-title">Konto erstellen</h1>
+    <p class="muted" style="margin-top:4px">Ein Name, eine E-Mail, ein Passwort.</p>
+
+    <form class="stack gap-3" style="margin-top:24px" data-od-id="register-form">
+      <!-- Username: uniqueness check on blur shows inline error -->
+      <div class="field field--error" data-od-id="field-username">
+        <label for="reg-user">Benutzername</label>
+        <input class="input" id="reg-user" name="username" type="text" autocomplete="username" value="mara" aria-describedby="err-user">
+        <span class="helper helper--error" id="err-user">Dieser Benutzername ist bereits vergeben.</span>
+      </div>
+
+      <div class="field" data-od-id="field-email">
+        <label for="reg-mail">E-Mail</label>
+        <input class="input" id="reg-mail" name="email" type="email" autocomplete="email" placeholder="du@example.com">
+      </div>
+
+      <!-- Password: rule checklist turns success/danger as typed -->
+      <div class="field" data-od-id="field-password">
+        <label for="reg-pw">Passwort</label>
+        <div class="input-wrap">
+          <input class="input" id="reg-pw" name="password" type="password" autocomplete="new-password" value="Sommer2026"
+                 aria-describedby="pw-rules"
+                 oninput="odCheckPw(this.value)">
+          <button class="icon-btn" type="button" aria-label="Passwort anzeigen" title="Passwort anzeigen"
+                  onclick="var i=document.getElementById('reg-pw'); i.type = i.type === 'password' ? 'text' : 'password';">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <ul class="rule-list" id="pw-rules">
+          <li id="pw-len" class="ok">mindestens 10 Zeichen</li>
+          <li id="pw-case" class="ok">Groß- und Kleinbuchstabe</li>
+          <li id="pw-digit" class="bad">mindestens eine Ziffer</li>
+        </ul>
+      </div>
+
+      <div class="field" data-od-id="field-password2">
+        <label for="reg-pw2">Passwort wiederholen</label>
+        <input class="input" id="reg-pw2" name="password2" type="password" autocomplete="new-password" value="Sommer2026">
+        <span class="helper" id="err-pw2">Die Passwörter stimmen überein.</span>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Konto erstellen</button>
+      </div>
+    </form>
+
+    <p class="small" style="text-align:center;margin-top:16px">
+      Bereits registriert? <a href="login.html">Anmelden</a>
+    </p>
+
+    <hr class="divider">
+    <p class="helper" style="text-align:center">Passwörter werden mit Argon2 gehasht.</p>
+  </div>
+</main>
+
+<div class="toast-region" aria-live="polite" data-od-id="toast-region"></div>
+<script src="app.js"></script>
+<script>
+function odCheckPw(v) {
+  var set = function (id, ok) {
+    var el = document.getElementById(id);
+    el.classList.toggle("ok", ok);
+    el.classList.toggle("bad", !ok);
+  };
+  set("pw-len", v.length >= 10);
+  set("pw-case", /[a-z]/.test(v) && /[A-Z]/.test(v));
+  set("pw-digit", /[0-9]/.test(v));
+}
+</script>
+</body>
+</html>

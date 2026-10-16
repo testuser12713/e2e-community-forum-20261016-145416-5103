@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thread bearbeiten — Community</title>
+<link rel="stylesheet" href="styles.css">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem("theme") || "system";
+    var d = t === "dark" || (t === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.setAttribute("data-theme", d ? "dark" : "light");
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+
+<header class="app-header" data-od-id="app-header">
+  <div class="container">
+    <a class="brand" href="index.html" data-od-id="brand"><span class="brand-mark" aria-hidden="true">C</span><span class="txt">Community</span></a>
+    <form class="search-bar" role="search" action="search.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" name="q" placeholder="Threads durchsuchen…" aria-label="Threads durchsuchen">
+    </form>
+    <div class="header-actions">
+      <a class="btn btn-primary" href="new-thread.html">Neuer Thread</a>
+      <div class="popwrap">
+        <button class="icon-btn" data-popover-trigger="avatar-menu" aria-label="Konto"><span class="avatar avatar--24 av-1">M</span></button>
+        <div class="menu" id="avatar-menu" data-popover hidden>
+          <a class="menu-item" href="profile.html">Profil</a><a class="menu-item" href="settings.html">Einstellungen</a>
+          <div class="menu-sep"></div><a class="menu-item" href="login.html">Abmelden</a>
+        </div>
+      </div>
+      <button class="icon-btn" data-theme-toggle aria-label="Hell/Dunkel umschalten">
+        <svg class="theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="container page" data-od-id="edit-thread-main">
+  <div class="layout--compose">
+    <div>
+      <nav class="crumb" aria-label="Brotkrumen"><a href="index.html">Start</a><span class="sep">›</span><a href="category.html">Backend</a><span class="sep">›</span><a href="thread-detail.html">PostgreSQL Indizes…</a><span class="sep">›</span><span>Bearbeiten</span></nav>
+      <h1 data-od-id="edit-title">Thread bearbeiten</h1>
+      <div class="banner banner--warning" style="margin-top:12px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+        Nach dem Speichern wird der Thread als „bearbeitet" gekennzeichnet.
+      </div>
+
+      <form class="card" style="margin-top:24px" onsubmit="return false" data-od-id="edit-thread-form">
+        <div class="stack gap-4">
+          <div class="field">
+            <label for="et-title">Titel</label>
+            <input class="input" id="et-title" maxlength="120" value="PostgreSQL Indizes richtig einsetzen — ein Leitfaden mit EXPLAIN ANALYZE" oninput="document.getElementById('et-title-count').textContent=this.value.length+'/120'">
+            <span class="field-counter" id="et-title-count">70/120</span>
+          </div>
+
+          <div class="field">
+            <label for="et-cat">Kategorie</label>
+            <select class="select" id="et-cat" aria-describedby="et-cat-hint">
+              <option>Backend</option><option>Frontend</option><option selected>Datenbanken</option>
+              <option>DevOps</option><option>Karriere</option><option>Meta</option>
+            </select>
+            <span class="helper" id="et-cat-hint">Nur Moderator:innen dürfen die Kategorie ändern; Autor:innen sehen sie schreibgeschützt.</span>
+          </div>
+
+          <div class="field">
+            <label id="et-body-label">Inhalt</label>
+            <div class="editor" aria-labelledby="et-body-label" data-od-id="markdown-editor">
+              <div class="editor-tabs" role="tablist">
+                <button class="editor-tab" role="tab" aria-selected="true" data-editor-tab="write">Schreiben</button>
+                <button class="editor-tab" role="tab" aria-selected="false" data-editor-tab="preview">Vorschau</button>
+              </div>
+              <div class="editor-toolbar" aria-label="Markdown-Werkzeuge">
+                <button type="button" title="Fett">B</button>
+                <button type="button" title="Kursiv" style="font-style:italic">I</button>
+                <button type="button" title="Link">🔗</button>
+                <button type="button" title="Code">&lt;/&gt;</button>
+                <button type="button" title="Zitat">„</button>
+              </div>
+              <textarea class="textarea--h200" aria-label="Thread-Inhalt">Ein Index ist kein Selbstzweck. Er beschleunigt das Lesen und verlangsamt jedes Schreiben.
+
+## Erst messen, dann indizieren
+
+Bevor irgendein `CREATE INDEX` entsteht, lohnt ein Blick auf den tatsächlichen Plan. Details siehe `EXPLAIN (ANALYZE, BUFFERS)`.
+
+## Composite statt vieler Einzelindizes
+
+Für Filter plus Sortierung ist ein zusammengesetzter Index fast immer die bessere Wahl.</textarea>
+              <div class="editor-preview md" data-editor-preview hidden></div>
+              <div class="editor-foot"><span class="helper">HTML und Skripte werden entfernt.</span></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="et-tags">Schlagwörter</label>
+            <input class="input" id="et-tags" placeholder="Mit Komma oder Enter hinzufügen">
+            <div class="row gap-1 wrap" style="margin-top:4px">
+              <span class="chip">#postgres <span class="x">×</span></span>
+              <span class="chip">#performance <span class="x">×</span></span>
+              <span class="chip">#datenbanken <span class="x">×</span></span>
+            </div>
+          </div>
+
+          <div class="row gap-2" style="justify-content:flex-end">
+            <a class="btn btn-ghost" href="thread-detail.html">Abbrechen</a>
+            <button class="btn btn-primary" type="submit" data-od-id="save-changes-btn">Änderungen speichern</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <aside class="sidebar compose-side" data-od-id="edit-thread-sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-heading">Hinweise</div>
+        <ul class="small muted" style="margin:0;padding-left:18px">
+          <li>Die Kennzeichnung „bearbeitet" erscheint mit Zeitstempel unter dem Titel.</li>
+          <li>Bereits abgegebene Stimmen bleiben unverändert.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<div class="toast-region" aria-live="polite" data-od-id="toast-region"></div>
+<script src="app.js"></script>
+</body>
+</html>

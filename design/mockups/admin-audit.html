@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audit-Log — Forum-Admin</title>
+<link rel="stylesheet" href="styles.css">
+<script>
+(function () {
+  try {
+    var t = localStorage.getItem("theme") || "system";
+    var d = t === "dark" || (t === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.setAttribute("data-theme", d ? "dark" : "light");
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+
+<div class="admin-shell" data-od-id="admin-shell">
+  <aside class="admin-sidebar" data-od-id="admin-sidebar">
+    <a class="brand admin-planelogo" href="admin-dashboard.html" data-od-id="admin-brand"><span class="brand-mark" aria-hidden="true">A</span> Forum-Admin</a>
+    <nav class="admin-nav" aria-label="Admin-Navigation">
+      <a class="admin-nav-item" href="admin-dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="admin-nav-item" href="admin-users.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Nutzer
+      </a>
+      <a class="admin-nav-item" href="admin-categories.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        Kategorien
+      </a>
+      <a class="admin-nav-item" href="admin-reports.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>
+        Meldungen <span class="badge badge--danger">7</span>
+      </a>
+      <a class="admin-nav-item admin-nav-item--active" href="admin-audit.html" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M8 6H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="M8 11h8M8 15h5"/></svg>
+        Audit-Log
+      </a>
+    </nav>
+    <div class="admin-side-foot">
+      <a class="admin-nav-item" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg> Zum Forum</a>
+      <button class="admin-nav-item" data-theme-toggle>
+        <svg class="theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        Darstellung
+      </button>
+      <div class="admin-account">
+        <span class="avatar avatar--24 av-5">A</span>
+        <div class="grow"><div style="font-size:13px;font-weight:600">@admin</div><div class="xs muted">Administrator</div></div>
+        <a class="icon-btn icon-btn--sm" href="admin-login.html" aria-label="Abmelden" title="Abmelden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg></a>
+      </div>
+    </div>
+  </aside>
+
+  <div class="admin-topbar" data-od-id="admin-topbar">
+    <button class="icon-btn" data-drawer-open aria-label="Navigation öffnen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <span style="font-weight:600">Forum-Admin</span>
+    <span class="badge badge--danger" style="margin-left:auto">7</span>
+  </div>
+
+  <div class="admin-drawer" id="admin-drawer" hidden data-od-id="admin-drawer">
+    <div class="drawer-panel">
+      <a class="brand admin-planelogo" href="admin-dashboard.html" style="margin-bottom:16px"><span class="brand-mark" aria-hidden="true">A</span> Forum-Admin</a>
+      <nav class="admin-nav" aria-label="Admin-Navigation (mobil)">
+        <a class="admin-nav-item" href="admin-dashboard.html">Dashboard</a>
+        <a class="admin-nav-item" href="admin-users.html">Nutzer</a>
+        <a class="admin-nav-item" href="admin-categories.html">Kategorien</a>
+        <a class="admin-nav-item" href="admin-reports.html">Meldungen <span class="badge badge--danger">7</span></a>
+        <a class="admin-nav-item admin-nav-item--active" href="admin-audit.html">Audit-Log</a>
+        <a class="admin-nav-item" href="index.html">Zum Forum</a>
+      </nav>
+    </div>
+    <div class="drawer-scrim" aria-hidden="true"></div>
+  </div>
+
+  <div class="admin-main" data-od-id="admin-main">
+    <div class="admin-head">
+      <div>
+        <h1 data-od-id="audit-title">Audit-Log</h1>
+        <p>Alle Moderations- und Verwaltungsaktionen, unveränderlich protokolliert.</p>
+      </div>
+      <div class="admin-head-actions">
+        <button class="btn btn-secondary btn-sm">CSV exportieren</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <form class="search-bar" role="search" action="admin-audit.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" name="q" placeholder="Akteur oder Ziel suchen…" aria-label="Audit-Log durchsuchen">
+      </form>
+      <select class="select select--sm" aria-label="Aktion filtern">
+        <option>Alle Aktionen</option><option>Rolle geändert</option><option>Nutzer gesperrt</option>
+        <option>Inhalt entfernt</option><option>Kategorie geändert</option><option>Anmeldung</option>
+      </select>
+      <select class="select select--sm" aria-label="Akteur filtern">
+        <option>Alle Akteure</option><option>@admin</option><option>@lena</option>
+      </select>
+      <input class="input" type="date" aria-label="Ab Datum" style="height:40px;width:auto">
+    </div>
+
+    <div class="table-wrap">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>Zeit</th><th>Akteur</th><th>Aktion</th><th>Ziel</th><th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-od-id="audit-row-1">
+            <td class="tabular muted" title="2026-10-16T14:58:00Z">16.10.2026, 14:58</td>
+            <td><a href="profile.html">@admin</a></td>
+            <td><span class="chip">Nutzer gesperrt</span></td>
+            <td><a href="profile.html">@spam_bot</a></td>
+            <td class="muted">Grund: Spam · unbefristet</td>
+          </tr>
+          <tr data-od-id="audit-row-2">
+            <td class="tabular muted" title="2026-10-16T14:31:00Z">16.10.2026, 14:31</td>
+            <td><a href="profile.html">@lena</a></td>
+            <td><span class="chip">Inhalt entfernt</span></td>
+            <td>Kommentar <span class="mono">#88213</span></td>
+            <td class="muted">Grund: Belästigung</td>
+          </tr>
+          <tr data-od-id="audit-row-3">
+            <td class="tabular muted" title="2026-10-16T13:12:00Z">16.10.2026, 13:12</td>
+            <td><a href="profile.html">@admin</a></td>
+            <td><span class="chip">Rolle geändert</span></td>
+            <td><a href="profile.html">@lena</a></td>
+            <td class="muted">Nutzer → Moderator</td>
+          </tr>
+          <tr data-od-id="audit-row-4">
+            <td class="tabular muted" title="2026-10-16T11:47:00Z">16.10.2026, 11:47</td>
+            <td><a href="profile.html">@admin</a></td>
+            <td><span class="chip">Kategorie geändert</span></td>
+            <td>Thread <span class="mono">#318</span></td>
+            <td class="muted">Frontend → DevOps</td>
+          </tr>
+          <tr data-od-id="audit-row-5">
+            <td class="tabular muted" title="2026-10-16T10:02:00Z">16.10.2026, 10:02</td>
+            <td><a href="profile.html">@admin</a></td>
+            <td><span class="chip">Anmeldung</span></td>
+            <td>Admin-Bereich</td>
+            <td class="muted">IP 203.0.113.17 · Erfolg</td>
+          </tr>
+          <tr data-od-id="audit-row-6">
+            <td class="tabular muted" title="2026-10-16T09:40:00Z">16.10.2026, 09:40</td>
+            <td><a href="profile.html">@lena</a></td>
+            <td><span class="chip">Meldung verworfen</span></td>
+            <td>Meldung <span class="mono">#1032</span></td>
+            <td class="muted">Kein Verstoß festgestellt</td>
+          </tr>
+          <tr data-od-id="audit-row-7">
+            <td class="tabular muted" title="2026-10-15T22:15:00Z">15.10.2026, 22:15</td>
+            <td><a href="profile.html">@admin</a></td>
+            <td><span class="chip">Kategorie erstellt</span></td>
+            <td>Security</td>
+            <td class="muted">Slug <span class="mono">security</span></td>
+          </tr>
+          <tr data-od-id="audit-row-8">
+            <td class="tabular muted" title="2026-10-15T20:03:00Z">15.10.2026, 20:03</td>
+            <td><a href="profile.html">@admin</a></td>
+            <td><span class="chip">Anmeldung</span></td>
+            <td>Admin-Bereich</td>
+            <td class="muted">IP 198.51.100.4 · Fehlgeschlagen</td>
+          </tr>
+          <tr data-od-id="audit-row-9">
+            <td class="tabular muted" title="2026-10-15T18:22:00Z">15.10.2026, 18:22</td>
+            <td><a href="profile.html">@lena</a></td>
+            <td><span class="chip">Thread gesperrt</span></td>
+            <td>Thread <span class="mono">#290</span></td>
+            <td class="muted">Umfrage beendet</td>
+          </tr>
+          <tr data-od-id="audit-row-10">
+            <td class="tabular muted" title="2026-10-15T17:05:00Z">15.10.2026, 17:05</td>
+            <td><a href="profile.html">@admin</a></td>
+            <td><span class="chip">Nutzer gesperrt</span></td>
+            <td><a href="profile.html">@anon_4711</a></td>
+            <td class="muted">Grund: Hassrede · bis 23.10.2026</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="pagination" aria-label="Seitennavigation">
+      <div class="pagination-row">
+        <button class="page-btn" disabled aria-label="Zurück">‹</button>
+        <button class="page-btn page-btn--current" aria-current="page">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <span class="page-btn" aria-hidden="true">…</span>
+        <button class="page-btn">38</button>
+        <button class="page-btn" aria-label="Weiter">›</button>
+      </div>
+      <span class="pagination-info">Seite 1 von 38 · 752 Einträge</span>
+    </nav>
+  </div>
+</div>
+
+<div class="toast-region" aria-live="polite" data-od-id="toast-region"></div>
+<script src="app.js"></script>
+</body>
+</html>
