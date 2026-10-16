@@ -35,9 +35,7 @@ export default function App() {
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/users/:username" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
-            {import.meta.env.DEV ? (
-              <Route path="/dev/gallery" element={<Gallery />} />
-            ) : null}
+            <Route path="/dev/gallery" element={<Gallery />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
