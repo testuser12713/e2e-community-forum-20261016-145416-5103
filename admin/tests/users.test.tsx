@@ -8,6 +8,7 @@ interface UserAdmin extends UserOut {
   banned_until: string | null;
   ban_reason: string | null;
   is_banned: boolean;
+  thread_count: number;
 }
 
 interface RecordedCall {
@@ -28,6 +29,7 @@ function makeUser(overrides: Partial<UserAdmin> = {}): UserAdmin {
     banned_until: null,
     ban_reason: null,
     is_banned: false,
+    thread_count: 0,
     ...overrides,
   };
 }
@@ -153,6 +155,20 @@ describe("admin user management", () => {
     expect(within(table).getByText("Gesperrt")).toBeTruthy();
     expect(within(table).getByText("Aktiv")).toBeTruthy();
     expect(within(table).getByText("-12")).toBeTruthy();
+  });
+
+  it("shows each user's thread count in the Threads column", async () => {
+    installFetch([
+      makeUser({ id: 1, username: "mara", thread_count: 12 }),
+      makeUser({ id: 2, username: "lena", thread_count: 9 }),
+    ]);
+    renderUsers();
+
+    await screen.findByText("@mara");
+    const table = usersTable();
+    expect(within(table).getByText("12")).toBeTruthy();
+    expect(within(table).getByText("9")).toBeTruthy();
+    expect(within(table).queryByText("—")).toBeNull();
   });
 
   it("searches by name or e-mail and asks the API for the query", async () => {
