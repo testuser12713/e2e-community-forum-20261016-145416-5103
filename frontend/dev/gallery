@@ -1,0 +1,4 @@
+// Dev-only gallery module at the frontend package root (extensionless variant).
+// It re-exports the canonical page component so the /dev/gallery route is
+// resolvable from frontend/dev/gallery without duplicating the implementation.
+export { default } from "../src/dev/Gallery";
