@@ -124,6 +124,10 @@
       "env": {
         "DATABASE_URL": {
           "dev": "${service:db.url}"
+        },
+        "JWT_SECRET": {
+          "generate": "hex",
+          "bytes": 32
         }
       }
     },
@@ -156,6 +160,8 @@
         "${python}",
         "main.py"
       ],
+      "ready_log": "ready: database",
+      "ready_timeout_s": 60,
       "test": [
         [
           "${python}",
@@ -170,6 +176,10 @@
       "env": {
         "DATABASE_URL": {
           "dev": "${service:db.url}"
+        },
+        "JWT_SECRET": {
+          "generate": "hex",
+          "bytes": 32
         },
         "WORKER_POLL_INTERVAL_SECONDS": {
           "dev": "5",
