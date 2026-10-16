@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import {
   Button,
@@ -30,6 +30,13 @@ const ROLE_VARIANT: Record<string, "role" | "moderator" | "admin"> = {
 };
 
 const BIO_MAX_LENGTH = 500;
+
+// The account value list is a two-column grid (`110px 1fr` at phone width). A grid
+// item defaults to `min-width: auto`, so a long unbreakable value such as an e-mail
+// address widens its track past the card and the whole page scrolls sideways at
+// 360px. Allowing the value to shrink and to break keeps the list inside the card,
+// exactly as design/mockups/settings.html shows.
+const VALUE_CELL_STYLE: CSSProperties = { minWidth: 0, overflowWrap: "anywhere" };
 
 interface ToastState {
   message: string;
@@ -164,19 +171,19 @@ export default function Settings() {
         <CardHead>
           <CardTitle>Konto</CardTitle>
         </CardHead>
-        <dl className="kv">
+        <dl className="kv" style={{ minWidth: 0 }}>
           <dt>Benutzername</dt>
-          <dd>@{user.username}</dd>
+          <dd style={VALUE_CELL_STYLE}>@{user.username}</dd>
           <dt>E-Mail</dt>
-          <dd>{user.email}</dd>
+          <dd style={VALUE_CELL_STYLE}>{user.email}</dd>
           <dt>Rolle</dt>
-          <dd>
+          <dd style={VALUE_CELL_STYLE}>
             <span className={`badge badge--${ROLE_VARIANT[user.role] ?? "role"}`}>
               {ROLE_LABEL[user.role] ?? user.role}
             </span>
           </dd>
           <dt>Mitglied seit</dt>
-          <dd>{formatDateTime(user.created_at)}</dd>
+          <dd style={VALUE_CELL_STYLE}>{formatDateTime(user.created_at)}</dd>
         </dl>
       </Card>
 
