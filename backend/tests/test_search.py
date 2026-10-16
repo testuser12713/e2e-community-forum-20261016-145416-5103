@@ -7,7 +7,7 @@ from __future__ import annotations
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from shared.models import Category, Thread, User
+from shared.models import Category, Comment, Thread, User
 
 
 def _make_user(db: Session, username: str) -> User:
@@ -154,6 +154,29 @@ def test_search_paginates_and_reports_the_total(client: TestClient, db_session: 
     assert first["pages"] == 2
     assert len(first["items"]) == 2
     assert len(second["items"]) == 1
+
+
+def test_search_counts_only_non_deleted_comments(client: TestClient, db_session: Session) -> None:
+    author = _make_user(db_session, "heidi")
+    category = _make_category(db_session, "General", "general")
+    thread = _make_thread(db_session, category, author, "A quokka story", "body")
+    db_session.add_all(
+        [
+            Comment(thread_id=thread.id, author_id=author.id, body_markdown="kept", depth=1),
+            Comment(
+                thread_id=thread.id,
+                author_id=author.id,
+                body_markdown="removed",
+                depth=1,
+                deleted=True,
+            ),
+        ]
+    )
+    db_session.commit()
+
+    body = _search(client, q="quokka")
+
+    assert body["items"][0]["comment_count"] == 1
 
 
 def test_search_empty_query_answers_422_in_the_error_envelope(

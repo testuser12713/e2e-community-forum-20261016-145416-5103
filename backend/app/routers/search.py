@@ -6,6 +6,10 @@ generated ``search_vector`` (title plus body), the rows are ranked by relevance
 and soft-deleted threads are excluded. An optional category slug and an optional
 tag narrow the result further. The answer is the contract's
 ``Page[ThreadSummary]``.
+
+Relevance is the search surface's order; the pinned-first rule describes the
+category listings, so a pinned but poorly matching thread does not outrank a
+better match here.
 """
 
 from __future__ import annotations
@@ -17,7 +21,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.errors import api_error
 from app.pagination import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, paginate
 from shared.db import get_db
-from shared.models import Category, Thread
+from shared.models import Category, Comment, Thread
 from shared.schemas.common import Page, UserBrief
 from shared.schemas.threads import ThreadSummary
 
@@ -26,7 +30,23 @@ router = APIRouter(tags=["search"])
 SEARCH_LANGUAGE = "english"
 
 
-def _thread_summary(thread: Thread) -> ThreadSummary:
+def _comment_counts(db: Session, thread_ids: list[int]) -> dict[int, int]:
+    """The number of non-deleted comments per thread, for the given ids.
+
+    Counted live over the comment rows, never read from the cached
+    ``Thread.comment_count`` column, so search agrees with the forum listing.
+    """
+    if not thread_ids:
+        return {}
+    rows = db.execute(
+        select(Comment.thread_id, func.count(Comment.id))
+        .where(Comment.thread_id.in_(thread_ids), Comment.deleted.is_(False))
+        .group_by(Comment.thread_id)
+    ).all()
+    return dict(rows)
+
+
+def _thread_summary(thread: Thread, comment_count: int) -> ThreadSummary:
     """Map a thread row (with its category and author loaded) to ``ThreadSummary``."""
     category = thread.category
     author = thread.author
@@ -38,7 +58,7 @@ def _thread_summary(thread: Thread) -> ThreadSummary:
         title=thread.title,
         tags=list(thread.tags or []),
         score=thread.score,
-        comment_count=thread.comment_count,
+        comment_count=comment_count,
         hot_score=thread.hot_score,
         pinned=thread.pinned,
         locked=thread.locked,
@@ -88,7 +108,9 @@ def search_threads(
         stmt = stmt.where(Thread.tags.contains([tag_name]))
 
     page_data = paginate(db, stmt, page, page_size)
-    items = [_thread_summary(thread) for thread in page_data["items"]]
+    threads = page_data["items"]
+    counts = _comment_counts(db, [thread.id for thread in threads])
+    items = [_thread_summary(thread, counts.get(thread.id, 0)) for thread in threads]
     return Page[ThreadSummary](
         items=items,
         total=page_data["total"],
