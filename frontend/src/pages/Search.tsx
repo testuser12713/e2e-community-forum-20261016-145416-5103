@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Button,
@@ -120,17 +120,28 @@ export default function Search() {
     setTagInput(tag);
   }, [tag]);
 
+  // A navigation is a React transition, so the re-render (and with it a fresh
+  // ``searchParams``) can lag behind two filter changes made in quick
+  // succession. Composing each update from a ref we keep in step with the URL
+  // keeps such changes from overwriting one another (e.g. a category select
+  // followed immediately by a tag submit).
+  const latestParams = useRef(searchParams);
+  useEffect(() => {
+    latestParams.current = searchParams;
+  }, [searchParams]);
+
   const updateParams = useCallback(
     (updates: Record<string, string | null>, resetPage = true) => {
-      const next = new URLSearchParams(searchParams);
+      const next = new URLSearchParams(latestParams.current);
       for (const [key, value] of Object.entries(updates)) {
         if (value === null || value === "") next.delete(key);
         else next.set(key, value);
       }
       if (resetPage) next.delete("page");
+      latestParams.current = next;
       setSearchParams(next, { replace: true });
     },
-    [searchParams, setSearchParams],
+    [setSearchParams],
   );
 
   const handleSearch = (value: string) => {
