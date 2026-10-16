@@ -66,6 +66,33 @@
       "env": {
         "DATABASE_URL": { "dev": "${service:db.url}" }
       }
+    },
+    {
+      "name": "worker",
+      "dir": "worker",
+      "stack": "python",
+      "kind": "worker",
+      "install": [
+        ["${python}", "-m", "pip", "install", "-q", "-r", "requirements.txt"]
+      ],
+      "build": [
+        ["${python}", "-m", "compileall", "-q", "."]
+      ],
+      "start": [
+        "${python}", "main.py"
+      ],
+      "test": [
+        ["${python}", "-m", "pytest", "-q"]
+      ],
+      "depends_on": ["db"],
+      "env": {
+        "DATABASE_URL": { "dev": "${service:db.url}" },
+        "WORKER_POLL_INTERVAL_SECONDS": {
+          "dev": "5",
+          "not_secret": true,
+          "why": "poll interval in seconds — a plain duration, not a credential"
+        }
+      }
     }
   ]
 }
