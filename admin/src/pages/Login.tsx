@@ -1,8 +1,68 @@
+import { useState, type FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { Banner, Button, Checkbox, Field, Input, PasswordInput } from "../components";
+import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import { FORUM_URL } from "../lib/api";
+import { ApiError, FORUM_URL, SESSION_STORAGE_KEY } from "../lib/api";
+
+const PERMISSION_ERROR = "Dieses Konto hat keine Berechtigung für den Administrationsbereich.";
+
+function isAdminRole(role: string): boolean {
+  return role === "admin" || role === "moderator";
+}
+
+function forgetPersistedSession(remember: boolean): void {
+  if (remember) return;
+  try {
+    window.localStorage.removeItem(SESSION_STORAGE_KEY);
+  } catch {
+    return;
+  }
+}
 
 export default function Login() {
   const { toggleTheme } = useTheme();
+  const { login, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+
+    const nextFieldErrors: Record<string, string> = {};
+    if (!email.trim()) nextFieldErrors.email = "Bitte E-Mail-Adresse angeben.";
+    if (!password) nextFieldErrors.password = "Bitte Passwort angeben.";
+    setFieldErrors(nextFieldErrors);
+    if (Object.keys(nextFieldErrors).length > 0) return;
+
+    setSubmitting(true);
+    try {
+      const user = await login(email.trim(), password);
+      if (!isAdminRole(user.role)) {
+        setError(PERMISSION_ERROR);
+        await logout();
+        return;
+      }
+      forgetPersistedSession(remember);
+      navigate("/", { replace: true });
+    } catch (caught) {
+      if (caught instanceof ApiError) {
+        setFieldErrors(caught.fields);
+        setError(caught.message);
+      } else {
+        setError("Die Anmeldung ist fehlgeschlagen. Bitte erneut versuchen.");
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <main className="auth-wrap">
@@ -35,13 +95,48 @@ export default function Login() {
           Zugang nur für Administratoren und Moderatoren. Alle Anmeldungen werden protokolliert.
         </p>
 
-        <p className="center small" style={{ textAlign: "center", marginTop: 16 }}>
+        {error !== null ? <Banner tone="danger">{error}</Banner> : null}
+
+        <form className="stack gap-3" style={{ marginTop: 24 }} onSubmit={handleSubmit} noValidate>
+          <Field label="E-Mail" htmlFor="admin-login-email" error={fieldErrors.email}>
+            <Input
+              id="admin-login-email"
+              name="email"
+              type="email"
+              autoComplete="username"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </Field>
+
+          <Field label="Passwort" htmlFor="admin-login-pw" error={fieldErrors.password}>
+            <PasswordInput
+              id="admin-login-pw"
+              name="password"
+              value={password}
+              autoComplete="current-password"
+              onChange={setPassword}
+            />
+          </Field>
+
+          <Checkbox checked={remember} onChange={setRemember}>
+            Angemeldet bleiben
+          </Checkbox>
+
+          <div className="form-actions">
+            <Button type="submit" variant="primary" size="lg" block loading={submitting}>
+              Anmelden
+            </Button>
+          </div>
+        </form>
+
+        <p className="small" style={{ textAlign: "center", marginTop: 16 }}>
           <a href={FORUM_URL}>Zurück zum Forum</a>
         </p>
 
         <hr className="divider" />
         <p className="helper" style={{ textAlign: "center" }}>
-          Die Anmeldung erscheint in Kürze.
+          Der Zugang ist auf 30 Minuten Inaktivität begrenzt.
         </p>
       </div>
     </main>

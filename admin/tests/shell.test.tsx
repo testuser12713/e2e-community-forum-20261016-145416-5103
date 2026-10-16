@@ -3,9 +3,23 @@ import { MemoryRouter } from "react-router-dom";
 import App from "../src/App";
 import { AuthProvider } from "../src/context/AuthContext";
 import { THEME_STORAGE_KEY, ThemeProvider } from "../src/context/ThemeContext";
-import { FORUM_URL } from "../src/lib/api";
+import { FORUM_URL, writeSession, type Session } from "../src/lib/api";
+
+const ADMIN_SESSION: Session = {
+  accessToken: "test-access-token",
+  user: {
+    id: 1,
+    username: "admin",
+    email: "admin@forum.test",
+    bio: null,
+    role: "admin",
+    karma: 0,
+    created_at: "2026-01-01T00:00:00Z",
+  },
+};
 
 function renderApp(route = "/") {
+  writeSession(ADMIN_SESSION);
   return render(
     <ThemeProvider>
       <AuthProvider>

@@ -3,8 +3,23 @@ import { MemoryRouter } from "react-router-dom";
 import App from "../src/App";
 import { AuthProvider } from "../src/context/AuthContext";
 import { ThemeProvider } from "../src/context/ThemeContext";
+import { writeSession, type Session } from "../src/lib/api";
+
+const ADMIN_SESSION: Session = {
+  accessToken: "test-access-token",
+  user: {
+    id: 1,
+    username: "admin",
+    email: "admin@forum.test",
+    bio: null,
+    role: "admin",
+    karma: 0,
+    created_at: "2026-01-01T00:00:00Z",
+  },
+};
 
 function renderGallery() {
+  writeSession(ADMIN_SESSION);
   return render(
     <ThemeProvider>
       <AuthProvider>
@@ -56,7 +71,7 @@ describe("admin UI kit gallery", () => {
       expect(screen.getAllByRole("link", { name: label }).length).toBeGreaterThan(0);
     }
     expect(screen.getAllByRole("link", { name: "Zum Forum" }).length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: "Abmelden" })).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: "Abmelden" }).length).toBeGreaterThan(0);
   });
 
   it("renders the disabled and loading button states", () => {
