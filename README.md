@@ -61,7 +61,31 @@ cd ../admin && npm install
 
 ## Starten in der Entwicklung
 
-### Gesamtes Produkt
+### Gesamtes Produkt — ein Befehl
+
+Ein einziger Befehl startet das komplette Produkt: die Datenbank, das gemeinsame Paket `shared` (als
+editierbare Abhängigkeit), die API, den Worker sowie Forum und Admin-Panel.
+
+```bash
+./dev.sh
+```
+
+Das Skript `dev.sh` im Projektwurzelverzeichnis startet zunächst PostgreSQL (`docker compose up -d db`),
+wartet auf die Bereitschaft der Datenbank, installiert alle Abhängigkeiten und startet danach API, Worker,
+Forum und Admin-Panel. Danach erreichbar:
+
+| Dienst            | Adresse                              |
+| ----------------- | ------------------------------------ |
+| Forum (`web`)     | http://localhost:5173                |
+| Admin-Panel       | http://localhost:5174                |
+| API (`api`)       | http://localhost:8000/api/health     |
+
+Mit `Ctrl+C` werden API, Worker und beide Dev-Server beendet; den Datenbank-Container stoppt man separat mit
+`docker compose down`. Alle Zugangsdaten (Datenbank, flüchtiges `JWT_SECRET`, CORS-Herkünfte,
+`VITE_API_BASE_URL`) setzt das Skript selbst — es ist keine manuelle Konfiguration nötig. Für eigene Werte
+können die Variablen aus der Tabelle unten vor dem Aufruf exportiert werden.
+
+### Alternativ: Dienste einzeln in Terminals
 
 `RUN.json` im Projektwurzelverzeichnis ist der Startvertrag: Er beschreibt für jeden Dienst den Installations-,
 Start- und Testbefehl, den Port, den Health-Pfad und alle Umgebungsvariablen. Ein Runner, der diese Datei liest
