@@ -18,7 +18,7 @@ export default function App() {
         <Route path="/categories" element={<Categories />} />
         <Route path="/moderation" element={<ModerationQueue />} />
         <Route path="/audit" element={<AuditLog />} />
-        {import.meta.env.DEV ? <Route path="/gallery" element={<Gallery />} /> : null}
+        <Route path="/gallery" element={<Gallery />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

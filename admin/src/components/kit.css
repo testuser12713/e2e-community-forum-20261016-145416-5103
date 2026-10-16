@@ -1,0 +1,40 @@
+/* ==========================================================================
+   Forum-Admin — kit refinements
+   The few states the shared mockup stylesheet (styles.css) leaves to the
+   components: disabled icon buttons, disabled menu items and disabled tabs.
+   Values come from the design tokens in tokens.css.
+   ========================================================================== */
+
+.icon-btn:disabled,
+.icon-btn[aria-disabled="true"] {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.menu-item:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.sort-tab:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.checkbox-row {
+  cursor: pointer;
+}
+
+/* Chrome details the mockup writes as inline styles. */
+.admin-account-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-topbar-title {
+  font-weight: 600;
+}
+
+.admin-planelogo--drawer {
+  margin-bottom: var(--space-3);
+}
