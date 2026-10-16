@@ -14,6 +14,7 @@ class UserAdmin(UserOut):
     banned_until: datetime | None
     ban_reason: str | None
     is_banned: bool
+    thread_count: int
 
 
 class BanRequest(BaseModel):

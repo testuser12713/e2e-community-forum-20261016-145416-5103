@@ -30,6 +30,7 @@ interface UserAdmin extends UserOut {
   banned_until: string | null;
   ban_reason: string | null;
   is_banned: boolean;
+  thread_count: number;
 }
 
 /** The contract's ``Page`` envelope, for views that need it in TypeScript. */
@@ -408,11 +409,7 @@ export default function Users() {
                         <Badge variant={ROLE_BADGE[user.role]}>{ROLE_LABELS[user.role] ?? user.role}</Badge>
                       </Td>
                       <Td num>{user.karma}</Td>
-                      <Td num>
-                        <span className="muted" title="Thread-Anzahl ist über die Admin-API nicht verfügbar">
-                          —
-                        </span>
-                      </Td>
+                      <Td num>{user.thread_count}</Td>
                       <Td>
                         <span className="muted">{formatDate(user.created_at)}</span>
                       </Td>

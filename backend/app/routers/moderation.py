@@ -6,10 +6,11 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
-from app.errors import api_error, not_implemented
+from app.errors import api_error
+from app.pagination import paginate
 from app.security import get_current_user, require_role
 from app.services.audit import record_audit
 from shared.db import get_db
@@ -55,9 +56,23 @@ def active_moderator(
     return user
 
 
-def _user_admin(db: Session, user: User) -> UserAdmin:
+def _thread_counts(db: Session, user_ids: list[int]) -> dict[int, int]:
+    """Non-deleted thread counts per user, for the given user ids."""
+    if not user_ids:
+        return {}
+    rows = db.execute(
+        select(Thread.author_id, func.count())
+        .where(Thread.author_id.in_(user_ids), Thread.deleted.is_(False))
+        .group_by(Thread.author_id)
+    ).all()
+    return dict(rows)
+
+
+def _user_admin(db: Session, user: User, thread_count: int | None = None) -> UserAdmin:
     """Map a user row plus its currently active ban onto ``UserAdmin``."""
     ban = active_ban(db, user.id)
+    if thread_count is None:
+        thread_count = _thread_counts(db, [user.id]).get(user.id, 0)
     return UserAdmin(
         id=user.id,
         username=user.username,
@@ -69,6 +84,7 @@ def _user_admin(db: Session, user: User) -> UserAdmin:
         banned_until=ban.expires_at if ban is not None else None,
         ban_reason=ban.reason if ban is not None else None,
         is_banned=ban is not None,
+        thread_count=thread_count,
     )
 
 
@@ -160,9 +176,28 @@ def unban_user(
     return _user_admin(db, user)
 
 
-@router.patch("/api/admin/users/{id}/role", response_model=UserAdmin, dependencies=moderator_only)
-def change_role(id: int, payload: RoleUpdate, db: Session = Depends(get_db)) -> UserAdmin:
-    raise not_implemented("role changes (#25)")
+@router.patch("/api/admin/users/{id}/role", response_model=UserAdmin)
+def change_role(
+    id: int,
+    payload: RoleUpdate,
+    db: Session = Depends(get_db),
+    actor: User = Depends(active_moderator),
+) -> UserAdmin:
+    """Change a user's role; every change lands in the audit log."""
+    user = _require_user(db, id)
+    previous_role = user.role
+    user.role = payload.role
+    record_audit(
+        db,
+        actor.id,
+        "user.role",
+        "user",
+        id,
+        {"role": payload.role, "previous_role": previous_role},
+    )
+    db.commit()
+    db.refresh(user)
+    return _user_admin(db, user)
 
 
 @router.get("/api/admin/users", response_model=Page[UserAdmin], dependencies=moderator_only)
@@ -173,7 +208,18 @@ def list_users(
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
 ) -> Page[UserAdmin]:
-    raise not_implemented("user administration (#25)")
+    """Search users by username or e-mail, filter by role, newest first."""
+    stmt = select(User).order_by(User.id.desc())
+    if q and q.strip():
+        pattern = f"%{q.strip()}%"
+        stmt = stmt.where(or_(User.username.ilike(pattern), User.email.ilike(pattern)))
+    if role:
+        stmt = stmt.where(User.role == role)
+    result = paginate(db, stmt, page, page_size)
+    users: list[User] = result["items"]
+    counts = _thread_counts(db, [user.id for user in users])
+    result["items"] = [_user_admin(db, user, counts.get(user.id, 0)) for user in users]
+    return Page[UserAdmin](**result)
 
 
 @router.post("/api/admin/threads/{id}/pin", response_model=ThreadSummary)
