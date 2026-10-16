@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { AdminBrand, AdminNav } from "../chrome/AdminNav";
 import { IconButton, MenuIcon } from "../components";
 import { useAuth } from "../context/AuthContext";
@@ -7,6 +7,7 @@ import "../components/kit.css";
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
+  const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
@@ -17,6 +18,10 @@ export default function AdminLayout() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [drawerOpen]);
+
+  if (!user) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
 
   const signOut = () => {
     void logout();
